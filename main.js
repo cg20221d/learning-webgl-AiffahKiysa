@@ -19,7 +19,7 @@ function main() {
         -0.7, 0.2,
 
         // angka 2
-        0.0, 0.2,
+        0.0, 0.22,
         0.0, 0.1,
         0.5, 0.1,
         0.5, 0.2,
@@ -33,7 +33,7 @@ function main() {
         0.12, 0.45,
         0.12, 0.6,
         0.4, 0.6,
-        0.4, 0.45
+        0.4, 0.47
     ];
 
     var buffer = gl.createBuffer();
@@ -93,5 +93,4 @@ function main() {
     gl.drawArrays(gl.LINE_LOOP, 8, 4);
 
     gl.drawArrays(gl.LINE_LOOP, 12, 15);
-
 }
