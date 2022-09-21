@@ -8,10 +8,10 @@ function main() {
         // -0.25, 0.2, 0.1, 1.0, 0.6,
         // 0.0, 0.2
 
-        0.5, 0.5, 0.0, 1.0, 1.0,
-        0.0, 0.0, 1.0, 0.0, 1.0,
-        -0.5, 0.5, 1.0, 1.0, 0.0,
-        0.0, 1.0, 1.0, 1.0, 1.0
+        0.5, 0.0, 0.0, 1.0, 1.0,
+        0.0, -0.5, 1.0, 0.0, 1.0,
+        -0.5, 0.0, 1.0, 1.0, 0.0,
+        0.0, 0.5, 1.0, 1.0, 1.0
     ];
 
     var buffer = gl.createBuffer();
@@ -59,6 +59,7 @@ function main() {
 
     // Variabel lokal
     var theta = 0.0;
+    var freeze = false;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
@@ -72,11 +73,19 @@ function main() {
     gl.enableVertexAttribArray(aPosition);
     gl.enableVertexAttribArray(aColor);
 
+    // grafik ainteraktif
+    function onMouseClick(event){
+        freeze = !freeze;
+    }
+    document.addEventListener("click", onMouseClick);
+
     function render(){
         gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
-        theta += 0.01;
-        gl.uniform1f(uTheta, theta);
+        if (!freeze){
+            theta += 0.1;
+            gl.uniform1f(uTheta, theta);
+        }
         // var vektor2D = [x, y];
         // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
         // gl.uniform2fv(uTheta, vektor2D);
