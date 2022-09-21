@@ -3,10 +3,15 @@ function main() {
     var gl = kanvas.getContext("webgl");
 
     var vertices = [
-        0.09, 0.5,  1.0, 1.0, 0.0, // bawah kanan
-        -0.25, 0.0,  0.7, 0.0, 1.0, // bawah kiri
-        -0.25, 0.5, 0.1, 1.0, 0.6, // atas
-        // 0.0, 1.0 // atas tengah
+        // 0.1, 0.5,  1.0, 1.0, 0.0,
+        // -0.25, 0.5,  0.7, 0.0, 1.0,
+        // -0.25, 0.2, 0.1, 1.0, 0.6,
+        // 0.0, 0.2
+
+        0.5, 0.5, 0.0, 1.0, 1.0,
+        0.0, 0.0, 1.0, 0.0, 1.0,
+        -0.5, 0.5, 1.0, 1.0, 0.0,
+        0.0, 1.0, 1.0, 1.0, 1.0
     ];
 
     var buffer = gl.createBuffer();
@@ -62,6 +67,6 @@ function main() {
     gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
     gl.clear(gl.COLOR_BUFFER_BIT);
     
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 
 }
