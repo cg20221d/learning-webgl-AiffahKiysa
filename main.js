@@ -73,20 +73,18 @@ function main() {
     gl.enableVertexAttribArray(aColor);
 
     function render(){
-        setTimeout(function(){
-            gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            theta += 0.01;
-            gl.uniform1f(uTheta, theta);
-            // var vektor2D = [x, y];
-            // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
-            // gl.uniform2fv(uTheta, vektor2D);
-            gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-            render()
-        }, 1000/30)
+        gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        theta += 0.01;
+        gl.uniform1f(uTheta, theta);
+        // var vektor2D = [x, y];
+        // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
+        // gl.uniform2fv(uTheta, vektor2D);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+        requestAnimationFrame(render);
         
     }
     // setInterval(render, 1000/60)
-    render()
-
+    // render()
+    requestAnimationFrame(render)
 }
