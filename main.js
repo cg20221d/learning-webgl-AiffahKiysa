@@ -33,13 +33,20 @@ function main() {
         // gl_Position = vec4(x + uHorizontal, y + uVertical, 0.0, 1.0);
 
         vec2 position = aPosition;
-        vec3 d = vec3(0.5, -0.5, 0.0);
+        // vec3 d = vec3(0.5, -0.5, 0.0);
+        mat4 rotation = mat4(
+            cos(uTheta), sin(uTheta), 0.0, 0.0,
+            -sin(uTheta), cos(uTheta), 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            0.0, 0.0, 0.0, 1.0
+        );
         mat4 translation = mat4(
             1.0, 0.0, 0.0, 0.0,
             0.0, 1.0, 0.0, 0.0,
             0.0, 0.0, 1.0, 0.0,
-            d.x, d.y, d.z, 1.0);
-        gl_Position = translation * vec4(position, 0.0, 1.0);
+            uHorizontal, uVertical, 0.0, 1.0
+        );
+        gl_Position = translation * rotation * vec4(position, 0.0, 1.0);
     }
     `;
 
@@ -115,14 +122,14 @@ function main() {
         gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        // if (!freeze) {
-        //     theta += 0.01;
-        //     gl.uniform1f(uTheta, theta);
-        // }
-        // horizontalPoints += horizontal;
-        // verticalPoints -= vertical;
-        // gl.uniform1f(uHorizontal, horizontalPoints);
-        // gl.uniform1f(uVertical, verticalPoints);
+        if (!freeze) {
+            theta += 0.01;
+            gl.uniform1f(uTheta, theta);
+        }
+        horizontalPoints += horizontal;
+        verticalPoints -= vertical;
+        gl.uniform1f(uHorizontal, horizontalPoints);
+        gl.uniform1f(uVertical, verticalPoints);
         // var vektor2D = [x, y];
         // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
         // gl.uniform2fv(uTheta, vektor2D);
