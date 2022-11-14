@@ -24,15 +24,22 @@ function main() {
     attribute vec3 aColor;
     varying vec3 fragColor;
     uniform float uTheta;
-    uniform float uUp;
-    uniform float uDown;
-    uniform float uRight;
-    uniform float uLeft;
+    uniform float uVertical;
+    uniform float uHorizontal;
     void main(){
         fragColor = aColor;
-        float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y + uRight + uLeft;
-        float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x + uUp + uDown;
-        gl_Position = vec4(x, y, 0.0, 1.0);
+        // float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
+        // float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
+        // gl_Position = vec4(x + uHorizontal, y + uVertical, 0.0, 1.0);
+
+        vec2 position = aPosition;
+        vec3 d = vec3(0.5, -0.5, 0.0);
+        mat4 translation = mat4(
+            1.0, 0.0, 0.0, 0.0,
+            0.0, 1.0, 0.0, 0.0,
+            0.0, 0.0, 1.0, 0.0,
+            d.x, d.y, d.z, 1.0);
+        gl_Position = translation * vec4(position, 0.0, 1.0);
     }
     `;
 
@@ -69,17 +76,15 @@ function main() {
 
     // Variabel lokal
     var theta = 0.0;
-    var up = 0.0;
-    var down = 0.0;
-    var right = 0.0;
-    var left = 0.0;
+    var horizontal = 0.0;
+    var vertical = 0.0;
+    var horizontalPoints = 0.0;
+    var verticalPoints = 0.0;
 
     // Variabel pointer ke GLSL
     var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
-    var uUp = gl.getUniformLocation(shaderProgram, "uUp");
-    var uDown = gl.getUniformLocation(shaderProgram, "uDown");
-    var uRight = gl.getUniformLocation(shaderProgram, "uRight");
-    var uLeft = gl.getUniformLocation(shaderProgram, "uLeft");
+    var uHorizontal = gl.getUniformLocation(shaderProgram, "uHorizontal");
+    var uVertical = gl.getUniformLocation(shaderProgram, "uVertical");
 
     // grafik ai nteraktif
     var freeze = false;
@@ -88,25 +93,21 @@ function main() {
     }
     document.addEventListener("click", onMouseClick, false);
 
-    var funUp = false;
-    var funDown = false;
-    var funRight = false;
-    var funLeft = false;
     function onKeyUp(event){
         if (event.keyCode == 32) freeze = false;
-        if (event.keyCode == 87) funUp = false;
-        if (event.keyCode == 83) funDown = false;
-        if (event.keyCode == 68) funRight = false;
-        if (event.keyCode == 65) funLeft = false;
+        if (event.keyCode == 87) vertical = 0.0;
+        if (event.keyCode == 83) vertical = 0.0;
+        if (event.keyCode == 68) horizontal = 0.0;
+        if (event.keyCode == 65) horizontal = 0.0;
     }
     document.addEventListener("keyup", onKeyUp, false);
 
     function onKeyDown(event){
         if (event.keyCode == 32) freeze = true;
-        if (event.keyCode == 87) funUp = true;
-        if (event.keyCode == 83) funDown = true;
-        if (event.keyCode == 68) funRight = true;
-        if (event.keyCode == 65) funLeft = true;
+        if (event.keyCode == 87) vertical = -0.01;
+        if (event.keyCode == 83) vertical = 0.01;
+        if (event.keyCode == 68) horizontal = 0.01;
+        if (event.keyCode == 65) horizontal = -0.01;
     }
     document.addEventListener("keydown", onKeyDown, false);
 
@@ -114,26 +115,14 @@ function main() {
         gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        if (!freeze) {
-            theta += 0.01;
-            gl.uniform1f(uTheta, theta);
-        }
-        if (funUp) {
-            up += 0.01;
-            gl.uniform1f(uUp, up);
-        }
-        if (funDown) {
-            down -= 0.01;
-            gl.uniform1f(uDown, down);
-        }
-        if (funRight) {
-            right += 0.01;
-            gl.uniform1f(uRight, right);
-        }
-        if (funLeft) {
-            left -= 0.01;
-            gl.uniform1f(uLeft, left);
-        }
+        // if (!freeze) {
+        //     theta += 0.01;
+        //     gl.uniform1f(uTheta, theta);
+        // }
+        // horizontalPoints += horizontal;
+        // verticalPoints -= vertical;
+        // gl.uniform1f(uHorizontal, horizontalPoints);
+        // gl.uniform1f(uVertical, verticalPoints);
         // var vektor2D = [x, y];
         // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
         // gl.uniform2fv(uTheta, vektor2D);
