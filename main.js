@@ -24,10 +24,14 @@ function main() {
     attribute vec3 aColor;
     varying vec3 fragColor;
     uniform float uTheta;
+    uniform float uUp;
+    uniform float uDown;
+    uniform float uRight;
+    uniform float uLeft;
     void main(){
         fragColor = aColor;
-        float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
-        float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
+        float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y + uRight + uLeft;
+        float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x + uUp + uDown;
         gl_Position = vec4(x, y, 0.0, 1.0);
     }
     `;
@@ -41,9 +45,6 @@ function main() {
     precision mediump float;
     varying vec3 fragColor;
     void main() {
-        float r = 1.0;
-        float g = 0.0;
-        float b = 0.0;
         gl_FragColor = vec4(fragColor, 1.0);
     }
     `;
@@ -57,13 +58,6 @@ function main() {
     gl.linkProgram(shaderProgram);
     gl.useProgram(shaderProgram);
 
-    // Variabel lokal
-    var theta = 0.0;
-    var freeze = false;
-
-    // Variabel pointer ke GLSL
-    var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
-
     // mengajari GPU bagaimana cara mengoleksi nilai posisi dari ARRAY_BUFFER
     // untuk setiap vertex yang sedang diproses
     var aPosition = gl.getAttribLocation(shaderProgram, "aPosition");
@@ -73,27 +67,80 @@ function main() {
     gl.enableVertexAttribArray(aPosition);
     gl.enableVertexAttribArray(aColor);
 
-    // grafik ainteraktif
+    // Variabel lokal
+    var theta = 0.0;
+    var up = 0.0;
+    var down = 0.0;
+    var right = 0.0;
+    var left = 0.0;
+
+    // Variabel pointer ke GLSL
+    var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
+    var uUp = gl.getUniformLocation(shaderProgram, "uUp");
+    var uDown = gl.getUniformLocation(shaderProgram, "uDown");
+    var uRight = gl.getUniformLocation(shaderProgram, "uRight");
+    var uLeft = gl.getUniformLocation(shaderProgram, "uLeft");
+
+    // grafik ai nteraktif
+    var freeze = false;
     function onMouseClick(event){
         freeze = !freeze;
     }
-    document.addEventListener("click", onMouseClick);
+    document.addEventListener("click", onMouseClick, false);
+
+    var funUp = false;
+    var funDown = false;
+    var funRight = false;
+    var funLeft = false;
+    function onKeyUp(event){
+        if (event.keyCode == 32) freeze = false;
+        if (event.keyCode == 87) funUp = false;
+        if (event.keyCode == 83) funDown = false;
+        if (event.keyCode == 68) funRight = false;
+        if (event.keyCode == 65) funLeft = false;
+    }
+    document.addEventListener("keyup", onKeyUp, false);
+
+    function onKeyDown(event){
+        if (event.keyCode == 32) freeze = true;
+        if (event.keyCode == 87) funUp = true;
+        if (event.keyCode == 83) funDown = true;
+        if (event.keyCode == 68) funRight = true;
+        if (event.keyCode == 65) funLeft = true;
+    }
+    document.addEventListener("keydown", onKeyDown, false);
 
     function render(){
         gl.clearColor(0.75, 0.75, 0.8, 1.0); // Merah, Hijau, Biru, Transparansi
         gl.clear(gl.COLOR_BUFFER_BIT);
-        if (!freeze){
-            theta += 0.1;
+
+        if (!freeze) {
+            theta += 0.01;
             gl.uniform1f(uTheta, theta);
+        }
+        if (funUp) {
+            up += 0.01;
+            gl.uniform1f(uUp, up);
+        }
+        if (funDown) {
+            down -= 0.01;
+            gl.uniform1f(uDown, down);
+        }
+        if (funRight) {
+            right += 0.01;
+            gl.uniform1f(uRight, right);
+        }
+        if (funLeft) {
+            left -= 0.01;
+            gl.uniform1f(uLeft, left);
         }
         // var vektor2D = [x, y];
         // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
         // gl.uniform2fv(uTheta, vektor2D);
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
-        
     }
     // setInterval(render, 1000/60)
     // render()
-    requestAnimationFrame(render)
+    requestAnimationFrame(render);
 }
