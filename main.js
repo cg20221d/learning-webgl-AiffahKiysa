@@ -110,6 +110,9 @@ function main() {
         glMatrix.mat4.translate(
             model, model, [horizontalPoints, verticalPoints, 0.0]
         );
+        glMatrix.mat4.rotateZ(
+            model, model, theta
+        );
         gl.uniformMatrix4fv(uModel, false, model);
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
