@@ -23,30 +23,11 @@ function main() {
     attribute vec2 aPosition;
     attribute vec3 aColor;
     varying vec3 fragColor;
-    uniform float uTheta;
-    uniform float uVertical;
-    uniform float uHorizontal;
+    uniform mat4 uModel;
     void main(){
         fragColor = aColor;
-        // float x = -sin(uTheta) * aPosition.x + cos(uTheta) * aPosition.y;
-        // float y = sin(uTheta) * aPosition.y + cos(uTheta) * aPosition.x;
-        // gl_Position = vec4(x + uHorizontal, y + uVertical, 0.0, 1.0);
-
         vec2 position = aPosition;
-        // vec3 d = vec3(0.5, -0.5, 0.0);
-        mat4 rotation = mat4(
-            cos(uTheta), sin(uTheta), 0.0, 0.0,
-            -sin(uTheta), cos(uTheta), 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0
-        );
-        mat4 translation = mat4(
-            1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            uHorizontal, uVertical, 0.0, 1.0
-        );
-        gl_Position = translation * rotation * vec4(position, 0.0, 1.0);
+        gl_Position = uModel * vec4(position, 0.0, 1.0);
     }
     `;
 
@@ -89,9 +70,7 @@ function main() {
     var verticalPoints = 0.0;
 
     // Variabel pointer ke GLSL
-    var uTheta = gl.getUniformLocation(shaderProgram, "uTheta");
-    var uHorizontal = gl.getUniformLocation(shaderProgram, "uHorizontal");
-    var uVertical = gl.getUniformLocation(shaderProgram, "uVertical");
+    var uModel = gl.getUniformLocation(shaderProgram, "uModel");
 
     // grafik ai nteraktif
     var freeze = false;
@@ -124,15 +103,14 @@ function main() {
 
         if (!freeze) {
             theta += 0.01;
-            gl.uniform1f(uTheta, theta);
         }
         horizontalPoints += horizontal;
         verticalPoints -= vertical;
-        gl.uniform1f(uHorizontal, horizontalPoints);
-        gl.uniform1f(uVertical, verticalPoints);
-        // var vektor2D = [x, y];
-        // gl.uniform2f(uTheta, vektor2D[0], vektor2D[1]);
-        // gl.uniform2fv(uTheta, vektor2D);
+        var model = glMatrix.mat4.create(); // Membuat matriks identitas
+        glMatrix.mat4.translate(
+            model, model, [horizontalPoints, verticalPoints, 0.0]
+        );
+        gl.uniformMatrix4fv(uModel, false, model);
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         requestAnimationFrame(render);
     }
