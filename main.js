@@ -86,6 +86,7 @@ function main() {
     varying vec3 vNormal;
     varying vec3 vPosition;             // titik fragmen
     uniform vec3 uLightPosition;        // titik lokasi sumber cahaya
+    uniform vec3 uViewerPosition;       // titik lokasi mata atau kamera pengamat
     // uniform vec3 uLightDirection;       // vektor arah datang sumber cahaya
     uniform mat3 uNormalModel;
     void main() {
@@ -100,7 +101,16 @@ function main() {
             float diffuseIntensity = cosTheta;
             diffuse = uLightConstant * diffuseIntensity;
         }
-        vec3 phong = ambient + diffuse;
+        vec3 normalizedReflector = normalize(reflect(lightRay, normalizedNormal));
+        vec3 normalizedViewer = normalize(uViewerPosition - vPosition);
+        float cosPhi = dot(normalizedReflector, normalizedViewer);
+        vec3 specular = vec3(0.0, 0.0, 0.0);
+        if (cosPhi > 0.0) {
+            float shininessConstant = 100.0;    // batas minimum spesifikasi spekular untuk materi logam
+            float specularIntensity = pow(cosPhi, shininessConstant);
+            specular = uLightConstant * specularIntensity;
+        }
+        vec3 phong = ambient + diffuse + specular;
         gl_FragColor = vec4(phong * fragColor, 1.0);
     }
     `;
@@ -113,6 +123,32 @@ function main() {
     gl.attachShader(shaderProgram, fragmentShaderObject);
     gl.linkProgram(shaderProgram);
     gl.useProgram(shaderProgram);
+
+    // Variabel lokal
+    var theta = 0.0;
+    var horizontal = 0.0;
+    var vertical = 0.0;
+    var horizontalPoints = 0.0;
+    var verticalPoints = 0.0;
+
+    // Variabel pointer ke GLSL
+    var uModel = gl.getUniformLocation(shaderProgram, "uModel");
+    // View
+    // var cameraX = 0.0;
+    // var cameraZ = 5.0;
+    var camera = [0.0, 0.0, 5.0];
+    var uView = gl.getUniformLocation(shaderProgram, "uView");
+    var view = glMatrix.mat4.create();
+    glMatrix.mat4.lookAt(
+        view,
+        camera,                    // the location of the eye or the camera
+        [camera[0], 0.0, -10],        // the point where the camera look at
+        [0.0, 1.0, 0.0]
+    );
+    // Projection
+    var uProjection = gl.getUniformLocation(shaderProgram, "uProjection");
+    var perspective = glMatrix.mat4.create();
+    glMatrix.mat4.perspective(perspective, Math.PI/3, 1.0, 0.5, 10.0);
 
     // mengajari GPU bagaimana cara mengoleksi nilai posisi dari ARRAY_BUFFER
     // untuk setiap vertex yang sedang diproses
@@ -135,32 +171,9 @@ function main() {
     var uLightPosition= gl.getUniformLocation(shaderProgram, "uLightPosition");
     gl.uniform3fv(uLightPosition, [2.0, 0.0, 0.0]);
     var uNormalModel = gl.getUniformLocation(shaderProgram, "uNormalModel");
-
-    // Variabel lokal
-    var theta = 0.0;
-    var horizontal = 0.0;
-    var vertical = 0.0;
-    var horizontalPoints = 0.0;
-    var verticalPoints = 0.0;
-
-    // Variabel pointer ke GLSL
-    var uModel = gl.getUniformLocation(shaderProgram, "uModel");
-    // View
-    var cameraX = 0.0;
-    var cameraZ = 5.0;
-    var uView = gl.getUniformLocation(shaderProgram, "uView");
-    var view = glMatrix.mat4.create();
-    glMatrix.mat4.lookAt(
-        view,
-        [cameraX, 0.0, cameraZ],    // the location of the eye or the camera
-        [cameraX, 0.0, -10],        // the point where the camera look at
-        [0.0, 1.0, 0.0]
-    );
-    // Projection
-    var uProjection = gl.getUniformLocation(shaderProgram, "uProjection");
-    var perspective = glMatrix.mat4.create();
-    glMatrix.mat4.perspective(perspective, Math.PI/3, 1.0, 0.5, 10.0);
-
+    var uViewerPosition = gl.getUniformLocation(shaderProgram, "uViewerPosition");
+    gl.uniform3fv(uViewerPosition, camera);
+    
     // grafik ai nteraktif
     var freeze = false;
     function onMouseClick(event){
@@ -183,6 +196,12 @@ function main() {
         if (event.keyCode == 83) vertical = 0.01;
         if (event.keyCode == 68) horizontal = 0.01;
         if (event.keyCode == 65) horizontal = -0.01;
+        if (event.keyCode == 37) camera[0] -= 0.1;
+        else if (event.keyCode == 39) camera[0] += 0.1;
+        if (event.keyCode == 38) camera[1] -= 0.1;
+        else if (event.keyCode == 40) camera[1] += 0.1;
+        gl.uniform3fv(uViewerPosition, camera);
+        glMatrix.mat4.lookAt(view, camera, [camera[0], camera[1], -10.0], [0.0, 1.0, 0.0]);
     }
     document.addEventListener("keydown", onKeyDown, false);
 
